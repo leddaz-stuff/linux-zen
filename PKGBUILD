@@ -1,9 +1,9 @@
 # Maintainer: Jan Alexander Steffens (heftig) <heftig@archlinux.org>
 
-pkgbase=linux-zen
+pkgbase=linux-zen-alder
 pkgver=6.8.2.zen2
 pkgrel=1
-pkgdesc='Linux ZEN'
+pkgdesc='Linux ZEN with Intel Alder Lake config'
 url='https://github.com/zen-kernel/zen-kernel'
 arch=(x86_64)
 license=(GPL-2.0-only)
@@ -40,21 +40,17 @@ validpgpkeys=(
   ABAF11C65A2970B130ABE3C479BE3E4300411886  # Linus Torvalds
   647F28654894E3BD457199BE38DBBDC86092693E  # Greg Kroah-Hartman
   83BC8889351B5DEBBB68416EB8AC08600F108CDF  # Jan Alexander Steffens (heftig)
+  31520F92C8520F6A9E0073D1D1644AB50DEA3011  # Me
 )
 # https://www.kernel.org/pub/linux/kernel/v6.x/sha256sums.asc
 sha256sums=('9ac322d85bcf98a04667d929f5c2666b15bd58c6c2d68dd512c72acbced07d04'
-            'SKIP'
+            '64008322e904d3bd3583430c9562ed991478df1623f06808859b5cef92631b5c'
             '86008bcb16cead3a16baca444a60cdeda3a92ab1e8b8f403328a427c033601d7'
-            'SKIP'
-            '256aff039086611bcf936b617e7e3f3d2947e6cc88bcbd5bd3e790b28cfc608b')
-b2sums=('f057c2512040600fbf0df67cf9c7200aee0c06b82b3cf749be8c5685844d2662a585ce17685c7af880c0d9dbbbd81302e5a1fa41c3dbd39869123121a0e82dc2'
-        'SKIP'
-        '850efa8e124509c7560fbb2f84ca1c49c2d0b7d6d2e0ecf764fde66a141f52ff0e94706711c47e4e6c7c48640c12accc9ae04d90a349c163f629d168f3e06f9d'
-        'SKIP'
-        'a95fb00f212ab2ab232b804b9300a96adfacfc6c41fd5e4c3ff35e8047640ddefeb52c4e8f41ebb66fe9b11cdc8fae222d2f9c46cc87f18a21be35600b55667b')
+            '423f458d24412d91d67c612212e996887fa80736ade5fb1302652415cf3b1d95'
+            '2ca540be2c5b763cfbafbf10d179b64b63664e6771548bfb1dcb31b66e7b662b')
 
-export KBUILD_BUILD_HOST=archlinux
-export KBUILD_BUILD_USER=$pkgbase
+export KBUILD_BUILD_HOST=$(cat /etc/hostname)
+export KBUILD_BUILD_USER=$(whoami)
 export KBUILD_BUILD_TIMESTAMP="$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})"
 
 prepare() {
