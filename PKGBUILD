@@ -52,6 +52,7 @@ sha256sums=('9ac322d85bcf98a04667d929f5c2666b15bd58c6c2d68dd512c72acbced07d04'
 export KBUILD_BUILD_HOST=$(cat /etc/hostname)
 export KBUILD_BUILD_USER=$(whoami)
 export KBUILD_BUILD_TIMESTAMP="$(date -Ru${SOURCE_DATE_EPOCH:+d @$SOURCE_DATE_EPOCH})"
+export JOBS=$(nproc --all)
 
 prepare() {
   cd $_srcname
@@ -72,18 +73,18 @@ prepare() {
 
   echo "Setting config..."
   cp ../config .config
-  make olddefconfig
+  make -j$JOBS olddefconfig
   diff -u ../config .config || :
 
-  make -s kernelrelease > version
+  make -j$JOBS -s kernelrelease > version
   echo "Prepared $pkgbase version $(<version)"
 }
 
 build() {
   cd $_srcname
-  make all
-  make -C tools/bpf/bpftool vmlinux.h feature-clang-bpf-co-re=1
-  make htmldocs
+  make -j$JOBS all
+  make -j$JOBS -C tools/bpf/bpftool vmlinux.h feature-clang-bpf-co-re=1
+  make -j$JOBS htmldocs
 }
 
 _package() {
@@ -113,13 +114,13 @@ _package() {
   echo "Installing boot image..."
   # systemd expects to find the kernel here to allow hibernation
   # https://github.com/systemd/systemd/commit/edda44605f06a41fb86b7ab8128dcf99161d2344
-  install -Dm644 "$(make -s image_name)" "$modulesdir/vmlinuz"
+  install -Dm644 "$(make -j$JOBS -s image_name)" "$modulesdir/vmlinuz"
 
   # Used by mkinitcpio to name the kernel
   echo "$pkgbase" | install -Dm644 /dev/stdin "$modulesdir/pkgbase"
 
   echo "Installing modules..."
-  ZSTD_CLEVEL=19 make INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 \
+  ZSTD_CLEVEL=19 make -j$JOBS INSTALL_MOD_PATH="$pkgdir/usr" INSTALL_MOD_STRIP=1 \
     DEPMOD=/doesnt/exist modules_install  # Suppress depmod
 
   # remove build link
@@ -134,10 +135,10 @@ _package-headers() {
   local builddir="$pkgdir/usr/lib/modules/$(<version)/build"
 
   echo "Installing build files..."
-  install -Dt "$builddir" -m644 .config Makefile Module.symvers System.map \
+  install -Dt "$builddir" -m644 .config make Module.symvers System.map \
     localversion.* version vmlinux tools/bpf/bpftool/vmlinux.h
-  install -Dt "$builddir/kernel" -m644 kernel/Makefile
-  install -Dt "$builddir/arch/x86" -m644 arch/x86/Makefile
+  install -Dt "$builddir/kernel" -m644 kernel/make
+  install -Dt "$builddir/arch/x86" -m644 arch/x86/make
   cp -t "$builddir" -a scripts
 
   # required when STACK_VALIDATION is enabled
